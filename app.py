@@ -2,12 +2,10 @@ import streamlit as st
 import random
 import time
 
-# 1. 페이지 설정
-st.set_page_config(page_title="공포의 시한폭탄 알람", page_icon="💀")
-st.title("💀 절대 못 자는 공포의 기괴한 알람")
-st.subheader("제한 시간 내에 미션을 해결하지 못하면 소리는 멈추지 않습니다.")
+st.set_page_config(page_title="공포의 알람", page_icon="💀")
+st.title("💀 절대 못 자는 기괴한 알람")
+st.subheader("제한 시간 내에 미션을 해결하세요!")
 
-# 2. 세션 상태 초기화
 if "alarm_cleared" not in st.session_state:
     st.session_state.alarm_cleared = False
 if "target_value" not in st.session_state:
@@ -15,20 +13,45 @@ if "target_value" not in st.session_state:
 if "start_time" not in st.session_state:
     st.session_state.start_time = time.time()
 
-# 3. 듣자마자 온몸이 찌릿해지는 소름 끼치고 기괴한 사운드 리스트 (자동 재생)
-# 구글 오디오 소스 중 가장 하이톤이거나 신경을 긁는 소리들로 선별
-creepy_sounds = [
-    "https://actions.google.com/sounds/v1/alarms/industrial_alarm_blare.ogg",     # 귀를 찢는 공장 경보음
-    "https://actions.google.com/sounds/v1/emergency/nuclear_siren.ogg",          # 공포의 핵전쟁 사이렌
-    "https://actions.google.com/sounds/v1/horror/ghost_whisper.ogg",             # 기괴한 유령의 속삭임 (소름 유발)
-    "https://actions.google.com/sounds/v1/foley/metal_screech.ogg",               # 칠판 긁는 듯한 금속 비명 소리
-    "https://actions.google.com/sounds/v1/animals/coyote_howl.ogg"               # 한밤중 기괴하게 울부짖는 늑대/코요테 소리
+# 변수명과 주소를 최대한 짧게 줄여서 잘림 방지
+s_list = [
+    "https://actions.google.com/sounds/v1/alarms/industrial_alarm_blare.ogg",
+    "https://actions.google.com/sounds/v1/emergency/nuclear_siren.ogg",
+    "https://actions.google.com/sounds/v1/horror/ghost_whisper.ogg",
+    "https://actions.google.com/sounds/v1/foley/metal_screech.ogg",
+    "https://actions.google.com/sounds/v1/animals/coyote_howl.ogg"
 ]
 
-# 4. 미션 진행 구역
 if not st.session_state.alarm_cleared:
+    # 안전하게 한 줄로 소리 선택
+    if "snd" not in st.session_state:
+        st.session_state.snd = random.choice(s_list)
     
-    # 기괴한 소리 무작위 선택 후 자동 재생 (귀가 아플 정도로 볼륨을 높여두세요!)
-    if "chosen_sound" not in st.session_state:
-        st.session_state.chosen_sound = random.choice(creepy_
-                                                      
+    st.audio(st.session_state.snd, format="audio/ogg", autoplay=True)
+    st.error("😱 기괴한 알람 작동 중!!! 뇌를 깨우세요!")
+    st.write("---")
+    
+    # 타이머 기능
+    limit = 20
+    elapsed = int(time.time() - st.session_state.start_time)
+    remain = limit - elapsed
+
+    if remain <= 0:
+        st.markdown("### 💥 폭발! 미션 수치와 버튼 위치가 재조합됩니다!")
+        st.session_state.target_value = random.randint(5, 95)
+        st.session_state.start_time = time.time()
+        if "snd" in st.session_state: del st.session_state.snd
+        st.rerun()
+    else:
+        st.progress(remain / limit, text=f"⏳ 폭발까지 남은 시간: {remain}초")
+
+    # 미션 숫자 범위 설정
+    if "t_max" not in st.session_state:
+        st.session_state.t_max = random.choice([150, 200, 250])
+        st.session_state.target_value = random.randint(10, st.session_state.t_max - 10)
+        
+    target = st.session_state.target_value
+    t_max = st.session_state.t_max
+    
+    st.info(f"🎯 슬라이더를 [ {target} ]
+    
